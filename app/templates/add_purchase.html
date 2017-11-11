@@ -1,0 +1,83 @@
+{% extends "main.html" %}
+
+{% block content %}
+<div class="panel panel-info">
+
+    <div class="panel-heading clearfix">
+        <div class="pull-left">Добавление транзакции</div>
+    </div>
+
+    <div id="alertDiv">
+        {% if errors %}
+                <div class="alert alert-danger alert-dismissible fade in">
+                    <a href="#" class="close" data-dismiss="alert" aria-label="close">&times;</a>
+                    <div class="text-center alertSize">{{ errors }}</div>
+                </div>
+        {% endif %}
+    </div>
+
+    <div class="panel-body">
+        <form class="form-horizontal" action="" method="POST">
+            <div class="row">
+                <div class="form-group">
+                    <label class="control-label col-sm-4" for="purchase_date">Дата покупки:</label>
+                        <div class='col-sm-6'>
+                            <div class='input-group date' id='datetimepicker1'>
+                                <input type='text' class="form-control" id="purchase_date" name="purchase_date" value=""/>
+                                <span class="input-group-addon">
+                                    <span class="glyphicon glyphicon-calendar"></span>
+                                </span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <script type="text/javascript">
+                    $(function () {
+                        $('#datetimepicker1').datepicker();
+                    });
+                </script>
+
+            <div class="row">
+                <div class="form-group">
+                    <label class="control-label col-sm-4" for="shop">Магазин:</label>
+                    <div class="col-sm-6">
+                         <div class='input-group date'>
+                            <input type="text" class="form-control" id="shop" name="shop" value="">
+                         </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="row">
+                <div class="form-group">
+                    <label class="control-label col-sm-4" for="price">Сумма:</label>
+                    <div class="col-sm-6">
+                         <div class='input-group date'>
+                            <input type="text" class="form-control" id="price" name="price" value="">
+                         </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="row">
+                <div class="form-group">
+                    <label class="control-label col-sm-4" for="payment_type">Способ оплаты:</label>
+                       <div class="col-sm-4">
+                            <div class='input-group date'>
+                              <select type="payment_type" placeholder="Payment type" class="form-control" name="payment_type" id="payment_type">
+                                <option value="card">C карты</option>
+                                <option value="cash">Наличные</option>
+                              </select>
+                            </div>
+                       </div>
+                </div>
+            </div>
+            <div class="panel-footer clearfix">
+                <div class="col-md-4">
+                    <button class="btn btn-success btn-block" role="button">Добавить</button>
+                </div>
+            </div>
+        </form>
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,81 @@
+{% extends "main.html" %}
+
+{% block content %}
+<div class="container">
+
+<h2>Контроль расходов</h2>
+    <p class="lead">
+        Здесь отображаются ваши транзакции
+    </p>
+
+     <div class="agenda">
+        <div class="table-responsive">
+            <table class="table table-condensed table-bordered">
+                <thead>
+                    <tr>
+                        <th>Дата</th>
+                        <th>Магазин</th>
+                        <th>Сумма</th>
+                        <th>Способ оплаты</th>
+                        <th>Просмотр</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for key in transactions.keys() %}
+                    <tr>
+                        <td class="agenda-date" class="active" rowspan=" {{ transactions[key]|length }}">
+                            <div class="dayofmonth">{{ key.day }}</div>
+                            <div class="dayofweek">{{ key.strftime('%B') }}</div>
+                            <div class="shortdate text-muted">{{ key.year }}</div>
+                        </td>
+                        {% for item in transactions[key] %}
+                            {% if transactions[key].index(item) == 0 %}
+                                 <td class="agenda-events">
+                                   <div class="agenda-event">{{ item.shop }}</div>
+                                 </td>
+                                 <td class="agenda-events">
+                                    <div class="agenda-event">{{ item.price }}</div>
+                                 </td>
+                                 <td class="agenda-events">
+                                    <div class="agenda-event">{{ item.payment_type }}</div>
+                                 </td>
+                                 <td>
+                                     <a class="btn btn-xs btn-block btn-info" href="{{url_for('goods', purchase_id = item.id)}}"> <span class="glyphicon glyphicon-arrow-right"></span>Список покупок</a>
+                                 </td>
+                                 <td>
+                                     <a class="btn btn-xs btn-block btn-danger" href="{{url_for('delete_purchase', purchase_id = item.id)}}"> <span class="glyphicon glyphicon-remove"></span>Удалить покупку</a>
+                                 </td>
+                            </tr>
+                            {% else %}
+                            <tr>
+                                <td class="agenda-events">
+                                   <div class="agenda-event">{{ item.shop }}</div>
+                                 </td>
+                                 <td class="agenda-events">
+                                    <div class="agenda-event">{{ item.price }}</div>
+                                 </td>
+                                 <td class="agenda-events">
+                                    <div class="agenda-event">{{ item.price }}</div>
+                                 </td>
+                                 <td class="agenda-events">
+                                    <div class="agenda-event">{{ item.payment_type }}</div>
+                                 </td>
+                                 <td>
+                                     <a class="btn btn-xs btn-block btn-info" href="{{url_for('goods', purchase_id = item.id)}}"> <span class="glyphicon glyphicon-arrow-right"></span>Список покупок</a>
+                                 </td>
+                                 <td>
+                                     <a class="btn btn-xs btn-block btn-danger" href="{{url_for('delete_purchase', purchase_id = item.id)}}"> <span class="glyphicon glyphicon-remove"></span>Удалить покупку</a>
+                                 </td>
+                            </tr>
+                            {% endif %}
+
+                        {% endfor %}
+                    {% endfor %}
+
+               </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+{% endblock %}

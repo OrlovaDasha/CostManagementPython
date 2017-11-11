@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="utf-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <title></title>
+
+        {% block css %}
+            <link href="{{ url_for('static', filename='css/bootstrap.min.css') }}" rel="stylesheet">
+            <link href="{{ url_for('static', filename='css/starter.css') }}" rel="stylesheet">
+            <link href="{{ url_for('static', filename='css/font-awesome.min.css') }}" rel="stylesheet">
+            <link href="{{ url_for('static', filename='css/navBar.css') }}" rel="stylesheet">
+            <link rel="stylesheet" href="{{ url_for('static', filename='css/transactions_table.css') }}">
+            <link rel="stylesheet" href="{{ url_for('static', filename='css/bootstrap-datetimepicker.css') }}" />
+            <link rel="stylesheet" href="{{ url_for('static', filename='css/upload.css') }}">
+        {% endblock %}
+        {% block scripts %}
+            <script type="text/javascript" src="{{ url_for('static', filename='js/jquery.min.js') }}"></script>
+            <script type="text/javascript" src="{{ url_for('static', filename='js/bootstrap.min.js') }}"></script>
+            <script type="text/javascript" src="{{ url_for('static', filename='js/moment.js') }}"></script>
+            <script type="text/javascript" src="{{ url_for('static', filename='js/bootstrap-datepicker.js') }}"></script>
+            <script type="text/javascript" src="{{ url_for('static', filename='js/bootstrap-datepicker.ru.min.js') }}"></script>
+        {% endblock %}
+    </head>
+
+    <body>
+    <div class="navbar-wrapper">
+        <div class="container-fluid">
+        <nav class="navbar navbar-fixed-top">
+            <div class="container">
+                <div class="navbar-header">
+                    <a class="navbar-brand" href="{{url_for('index')}}">Logo</a>
+                </div>
+                <div id="navbar" class="navbar-collapse collapse">
+                    <ul class="nav navbar-nav">
+                       {% for item in nav.top %}
+                           <li class="{{ 'active' if item.is_active else '' }}">
+                               {% if item.items %}
+                               <li class=" dropdown">
+                                <a href="#" class="dropdown-toggle " data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false">{{ item.label }}<span class="caret"></span></a>
+                                 <ul class="dropdown-menu">
+                                    {% for child in item.items %}
+                                    <li class="{{ 'active' if child.is_active else '' }}">
+                                        <a href="{{ child.url }}">{{ child.label }}</a>
+                                    </li>
+                                     {% endfor %}
+                                 </ul>
+                                </li>
+                               {% else %}
+                                <a href="{{ item.url }}">{{ item.label }}</a>
+                                {% endif %}
+                           </li>
+                        {% endfor %}
+                    </ul>
+                    <ul class="nav navbar-nav pull-right">
+                        <li class=" dropdown"><a href="#" class="dropdown-toggle active" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false">{{username}}<span class="caret"></span></a>
+                            <ul class="dropdown-menu">
+                                <li><a href="#">Настройки</a></li>
+                                <li><a href="{{ url_for('logout')}}">Выйти</a></li>
+                            </ul>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+        </nav>
+    </div>
+</div>
+
+     <div class="container">
+            <div class="jumbotron">
+                <h1>{% block page_heading %}{% endblock %}</h1>
+                {% block content %}{% endblock %}
+            </div>
+     </div>
+    </body>
+</html>

@@ -1,0 +1,202 @@
+/* This template was taken from bootstrap templates */
+
+/* Space out content a bit */
+body {
+    padding-top: 20px;
+    padding-bottom: 20px;
+}
+
+/* Everything but the jumbotron gets side spacing for mobile first views 
+*/
+.header,
+.marketing,
+.footer {
+    padding-right: 15px;
+    padding-left: 15px;
+}
+
+/* Custom page header */
+.header {
+    border-bottom: 1px solid #e5e5e5;
+}
+
+/* Make the masthead heading the same height as the navigation */
+.header h3 {
+    padding-bottom: 19px;
+    margin-top: 0;
+    margin-bottom: 0;
+    line-height: 40px;
+}
+
+/* Custom page footer */
+.footer {
+    padding-top: 19px;
+    color: #777;
+    border-top: 1px solid #e5e5e5;
+}
+
+/* Customize container */
+@media (min-width: 768px) {
+    .container {
+        max-width: auto; /*768px;*/
+    }
+}
+
+.container-narrow > hr {
+    margin: 30px 0;
+}
+
+/* Main marketing message and sign up button */
+.jumbotron {
+    text-align: center;
+    border-bottom: 1px solid #e5e5e5;
+}
+
+.jumbotron .indexButton {
+    padding: 14px 24px;
+    font-size: 21px;
+}
+
+/* Supporting marketing content */
+.marketing {
+    margin: 40px 0;
+}
+
+.marketing p + h4 {
+    margin-top: 28px;
+}
+
+/* Responsive: Portrait tablets and up */
+@media screen and (min-width: 768px) {
+    /* Remove the padding we set earlier */
+    .header,
+    .marketing,
+    .footer {
+        padding-right: 0;
+        padding-left: 0;
+    }
+
+    /* Space out the masthead */
+    .header {
+        margin-bottom: 30px;
+    }
+
+    /* Remove the bottom border on the jumbotron for visual effect */
+    .jumbotron {
+        border-bottom: 0;
+    }
+}
+
+/* My notes */
+
+.smartStatusSize {
+    font-size: 30px;
+}
+
+.alertSize {
+    font-size: 20px;
+}
+
+.smartStatusInit {
+    color: blue;
+}
+
+.smartStatusDown {
+    color: red;
+}
+
+.smartStatusUp {
+    color: green;
+}
+
+.smartStatusBroken {
+    color: red;
+    font-weight: bold;
+}
+
+.text-bold {
+    font-weight: bold;
+}
+
+.listLog {
+    margin-top: 28px;
+    font-size: 20px;
+}
+
+.queryTable {
+    word-break: break-all;
+    table-layout: fixed;
+}
+
+.table > tbody > tr > td {
+    vertical-align: middle;
+}
+
+.headerFontSize {
+    font-size: 20px;
+}
+
+.btn-toolbar .btn-group {
+    float: none;
+    margin-bottom: 15px;
+}
+
+.columnFontSize {
+    font-size: 16px;
+}
+
+.table tbody > tr > td.vert-align {
+    vertical-align: middle;
+}
+
+.optionDiv {
+    margin-top: 28px;
+    font-size: 16px;
+}
+
+.alertButtonMargin {
+    margin-right: 5px;
+}
+
+tfoot input {
+    width: auto;
+    padding: 3px;
+    box-sizing: border-box;
+}
+
+.dataTables_wrapper > .row {
+    margin-left:    0;
+    margin-right:   0;
+}
+
+#addingTriplesTable_wrapper #addingTriplesTable_length {
+    display: none;
+}
+
+#addingTriplesTable_wrapper #addingTriplesTable_filter {
+    display: none;
+}
+
+#addingTriplesTable_wrapper #addingTriplesTable_info {
+    display: none;
+}
+
+#addingTriplesTable_wrapper #addingTriplesTable_paginate {
+    display: none;
+}
+
+table#addingTriplesTable
+{
+    border-collapse:separate;
+    border-spacing:0 5px;
+}
+
+#storageButtonLine .btn-toolbar .btn {
+    float: none;
+    margin-bottom: 25px;
+    margin-top: 15px;
+}
+
+#storageButtonLine .btn-space {
+    margin-right: 15px;
+}

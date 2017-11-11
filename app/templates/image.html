@@ -1,0 +1,32 @@
+{% extends "main.html" %}
+
+{% block content %}
+ <div id="alertDiv">
+        {% if errors %}
+                <div class="alert alert-danger alert-dismissible fade in">
+                    <a href="#" class="close" data-dismiss="alert" aria-label="close">&times;</a>
+                    <div class="text-center alertSize">{{ errors }}</div>
+                </div>
+        {% endif %}
+ </div>
+
+  <div class="container">
+      <div class="panel panel-default">
+        <div class="panel-heading"><strong>Загрузка чека</strong> <small>(Выберите электронную версию чека)</small></div>
+        <div class="panel-body">
+
+          <h4>Выберите нужное изображение</h4>
+          <form action="" method="post" enctype="multipart/form-data" id="js-upload-form">
+            <div class="form-inline">
+              <div class="form-group">
+                <input type="file" name="image" id="js-upload-files" multiple>
+              </div>
+              <button type="submit" class="btn btn-sm btn-primary" id="js-upload-submit">Загрузить файл</button>
+            </div>
+          </form>
+        </div>
+      </div>
+  </div>
+
+
+{% endblock %}
