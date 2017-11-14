@@ -51,7 +51,7 @@ def delete_purchase(purchase_id):
     try:
         purchase = Purchase.query.filter_by(id = purchase_id).first()
         userPurchase = UsersPurchase.query.filter_by(user_id = current_user.id, purchase_id = purchase_id).first()
-        consists = PurchaseConsist.query.filter_by(purchase_id = purchase_id).all()
+        consists = PurchaseConsist.query.filter_by(purchase_id = userPurchase.id).all()
         for consist in consists:
             good = Goods.query.filter_by(id = consist.good_id).first()
             db.session.delete(consist)

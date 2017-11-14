@@ -22,15 +22,20 @@ def common_parse(text):
 
     text = list(filter(None, text))
 
-    shop_name = re.compile(
+    shop_name_1 = re.compile(
         '^(?:(?:[oо0][oо0][oо0])|(?:[оo]бщ[еe][сc][тt][вb][оo] [сc] [oо]г[рp][аa][нh]ич[еe]нн[оo]й [оo][тt]в[еe]'
         '[тt][сc][тt][вb][еe][нh][hн][oо][cс][tт]ью))\s?.*?(\w+\s?\w*).*?$')
+    shop_name_2 = re.compile(
+        '^(?:(?:[oо0][oо0][oо0])|(?:[оo]бщ[еe][сc][тt][вb][оo] [сc] [oо]г[рp][аa][нh]ич[еe]нн[оo]й [оo][тt]в[еe]'
+        '[тt][сc][тt][вb][еe][нh][hн][oо][cс][tт]ью))$')
     data_regex = re.compile('^^([0-9]{2})[,‚..]?\s?([0-9]{2})[,‚..]?\s?([0-9]{4}).*$')
     all_sum_regex = re.compile('([0-9]{0,3},?[0-9]{0,3}\.[0-9]{2})$')
     all_regex = re.compile('^(?:и[тt][оo]г[оo])|(?:.*[kк][аa][рp][тt][аa])|(?:[нh][aа][лп]ич[hн]ы[eе])')
-    item_regex = re.compile('^[0-9]*(.*?)\s*([0-9]{0,3},?[0-9]{1,3}\.[0-9]{2})\s*([0-9]*?\.[0-9]{1,2})\s*'
-                            '([0-9]{0,3},?[0-9]{0,3}\.[0-9]{2})$')
+    item_regex = re.compile('^[0-9]*(.*?)\s*((?:[0-9]{0,3},)?[0-9]{1,3}\.[0-9]{2})\s*([0-9]*?\.[0-9]{1,3})\s*'
+                            '((?:[0-9]{0,3},)?[0-9]{0,3}\.[0-9]{2})$')
     regexp = {1: 'и[тt][оo]г[оo]', 2: '[kк][аa][рp][тt][аa]', 3: '[нh][aа][лп]ич[hн]ы[eе]'}
+
+    print(text[0:1])
 
     address = None
     data = None
@@ -42,13 +47,17 @@ def common_parse(text):
     card_sum = None
     money_sum = None
     payment_type = 'cash'
+    index = False
 
-    print(text[2])
     for row in text:
 
-        if shop_name.match(row.lower()):
-            data = shop_name.findall(row.lower())[0]
+        if shop_name_1.match(row.lower()):
+            data = shop_name_1.findall(row.lower())[0]
             shop = data.title()
+            print("shop 1")
+
+        if shop_name_2.match(row.lower()):
+            index = True
 
         if data_regex.match(row):
             data = data_regex.findall(row)
@@ -93,5 +102,11 @@ def common_parse(text):
             all_sum = card_sum
         elif money_sum is not None and float(money_sum) > 0:
             all_sum = money_sum
+
+    if shop is None or shop == '':
+        shop = 'Unknown'
+
+    if index:
+        shop = text[1]
 
     return text, shop, address, buy_date, all_sum, items, payment_type

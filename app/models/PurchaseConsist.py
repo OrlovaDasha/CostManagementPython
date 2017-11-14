@@ -7,7 +7,7 @@ class PurchaseConsist(db.Model):
     __tablename__= 'purchase_consist'
     id = db.Column(db.Integer, nullable=False, primary_key=True)
     good_id = db.Column(db.Integer, db.ForeignKey('goods.id'), nullable=False)
-    purchase_id = db.Column(db.Integer, db.ForeignKey('purchase.id'), nullable=False)
+    purchase_id = db.Column(db.Integer, db.ForeignKey('users_purchase.id'), nullable=False)
     number = db.Column(db.Integer, nullable=False)
     sale = db.Column(db.DECIMAL, nullable=False, default=0)
 

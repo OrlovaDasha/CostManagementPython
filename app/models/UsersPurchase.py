@@ -12,4 +12,4 @@ class UsersPurchase(db.Model):
         self.purchase_id = purchase_id
 
     def __repr__(self):
-        return "{} {}".format(self.user_id, self.purchase_id)
+        return "{} - {} - {}".format(self.id, self.user_id, self.purchase_id)

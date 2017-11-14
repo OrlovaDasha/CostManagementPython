@@ -37,7 +37,8 @@ def image():
 
                 if file and allowed_file(file.filename):
                     filename = secure_filename(file.filename)
-                    path = "/".join([app.config['UPLOAD_FOLDER'], filename])
+                    path = "".join([app.config['UPLOAD_FOLDER'], filename])
+                    print(path)
                     file.save(path)
 
                 image = Image.open(path)
@@ -61,7 +62,6 @@ def image():
             flag = False
             try:
                 purchase = Purchase(buy_date, shop, float(sum), payment_type)
-                print(purchase)
                 purchase_new = Purchase.query.filter_by(purchase_date = purchase.purchase_date, shop = purchase.shop, price=purchase.price).first()
                 if purchase_new is None:
                     db.session.add(purchase)
@@ -110,28 +110,28 @@ def image():
                 except Exception as e:
                     print(e)
                     db.session.rollback()
-                    db.session.delete(user_purchase)
                     for g in goods:
                         db.session.delete(g)
                     for pg in purchases_goods:
                         db.session.delete(pg)
+                    db.session.delete(user_purchase)
                     db.session.delete(purchase)
                     db.session.commit()
                     return render_template("image.html", errors=e, username=Users.query.filter_by(id=current_user.id).first().username)
 
                 try:
-                    purchase_consist = PurchaseConsist(good.id, purchase.id, item.get('number'))
+                    purchase_consist = PurchaseConsist(good.id, user_purchase.id, item.get('number'))
                     db.session.add(purchase_consist)
                     db.session.commit()
                     purchases_goods.append(purchase_consist)
                 except Exception as e:
                     print(e)
                     db.session.rollback()
-                    db.session.delete(user_purchase)
                     for g in goods:
                         db.session.delete(g)
                     for pg in purchases_goods:
                         db.session.delete(pg)
+                    db.session.delete(user_purchase)
                     db.session.delete(purchase)
                     db.session.commit()
                     return render_template("image.html", errors=e, username=Users.query.filter_by(id=current_user.id).first().username)
