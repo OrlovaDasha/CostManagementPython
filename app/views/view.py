@@ -74,6 +74,3 @@ def transactions():
     return render_template("transactions.html")
 
 
-@app.route('/categorise')
-def categorise():
-    return render_template("transactions.html")

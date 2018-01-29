@@ -1,7 +1,10 @@
 import os
 import re
+import time
 from datetime import datetime
+from multiprocessing.pool import Pool
 
+import multiprocessing
 from PIL import Image
 from flask import request, redirect, url_for, render_template, flash
 from flask_login import current_user
@@ -25,6 +28,12 @@ def allowed_file(filename):
            filename.rsplit('.', 1)[1].lower() in ALLOWED_EXTENSIONS
 
 
+def getText(filename):
+    text = pytesseract.image_to_string(Image.open(filename), lang="eng+rus")
+    os.remove(filename)
+    return text
+
+
 @app.route('/image', methods=['GET', 'POST'])
 def image():
     if current_user.is_authenticated:
@@ -33,36 +42,50 @@ def image():
                 file = request.files['image']
 
                 if file.filename == '':
-                    return redirect(request.url, error = 'No selected file')
+                    return redirect(request.url, error='No selected file')
 
                 if file and allowed_file(file.filename):
-                    filename = secure_filename(file.filename)
+                    filename = str(current_user) + secure_filename(file.filename)
                     path = "".join([app.config['UPLOAD_FOLDER'], filename])
                     print(path)
                     file.save(path)
 
                 image = Image.open(path)
-                images = slice_image(image, 'slice')
+                images = slice_image(image, os.path.splitext(filename)[0] + '_slice')
+                os.remove(path)
 
                 text = ''
 
-                for image in images:
+                cpuCount = multiprocessing.cpu_count()
+                pool = Pool(cpuCount)
+                result = pool.map(getText, images)
+                pool.close()
+
+                for res in result:
                     text += '\n'
-                    text += pytesseract.image_to_string(Image.open(image), lang="eng+rus")
-                    os.remove(image)
+                    text += res
+
+                # for image in images:
+                #     text += '\n'
+                #     text += pytesseract.image_to_string(Image.open(image), lang="eng+rus")
+                #     os.remove(image)
+
 
                 result = text.split('\n')
 
                 result, shop, address, buy_date, sum, items, payment_type = common_parse(result)
+                print(shop, address, sum)
 
             except Exception as e:
                 print(e)
-                return render_template("image.html", errors=e, username=Users.query.filter_by(id=current_user.id).first().username)
+                return render_template("image.html", errors=e,
+                                       username=Users.query.filter_by(id=current_user.id).first().username)
 
             flag = False
             try:
                 purchase = Purchase(buy_date, shop, float(sum), payment_type)
-                purchase_new = Purchase.query.filter_by(purchase_date = purchase.purchase_date, shop = purchase.shop, price=purchase.price).first()
+                purchase_new = Purchase.query.filter_by(purchase_date=purchase.purchase_date, shop=purchase.shop,
+                                                        price=purchase.price).first()
                 if purchase_new is None:
                     db.session.add(purchase)
                     db.session.commit()
@@ -74,11 +97,13 @@ def image():
             except Exception as e:
                 print(e)
                 db.session.rollback()
-                return render_template("image.html", errors=e, username=Users.query.filter_by(id=current_user.id).first().username)
+                return render_template("image.html", errors=e,
+                                       username=Users.query.filter_by(id=current_user.id).first().username)
 
             try:
                 user_purchase = UsersPurchase(current_user.get_id(), purchase.id)
-                user_purchase_new = UsersPurchase.query.filter_by(user_id = user_purchase.user_id, purchase_id = user_purchase.purchase_id).first()
+                user_purchase_new = UsersPurchase.query.filter_by(user_id=user_purchase.user_id,
+                                                                  purchase_id=user_purchase.purchase_id).first()
                 if user_purchase_new is None:
                     db.session.add(user_purchase)
                     db.session.commit()
@@ -86,13 +111,15 @@ def image():
                     print(user_purchase)
                     user_purchase = user_purchase_new
                     if flag:
-                        return render_template("image.html", errors="Такой чек уже есть", username=Users.query.filter_by(id=current_user.id).first().username)
+                        return render_template("image.html", errors="Такой чек уже есть",
+                                               username=Users.query.filter_by(id=current_user.id).first().username)
             except Exception as e:
                 print(e)
                 db.session.rollback()
                 db.session.delete(purchase)
                 db.session.commit()
-                return render_template("image.html", errors=e, username=Users.query.filter_by(id=current_user.id).first().username)
+                return render_template("image.html", errors=e,
+                                       username=Users.query.filter_by(id=current_user.id).first().username)
 
             goods = []
             purchases_goods = []
@@ -100,7 +127,7 @@ def image():
             for item in items:
                 try:
                     good = Goods(item.get('name'), float(item.get('cost')))
-                    find_good = Goods.query.filter_by(name = good.name, price = good.price).first()
+                    find_good = Goods.query.filter_by(name=good.name, price=good.price).first()
                     if find_good is None:
                         db.session.add(good)
                         db.session.commit()
@@ -117,7 +144,8 @@ def image():
                     db.session.delete(user_purchase)
                     db.session.delete(purchase)
                     db.session.commit()
-                    return render_template("image.html", errors=e, username=Users.query.filter_by(id=current_user.id).first().username)
+                    return render_template("image.html", errors=e,
+                                           username=Users.query.filter_by(id=current_user.id).first().username)
 
                 try:
                     purchase_consist = PurchaseConsist(good.id, user_purchase.id, item.get('number'))
@@ -134,7 +162,8 @@ def image():
                     db.session.delete(user_purchase)
                     db.session.delete(purchase)
                     db.session.commit()
-                    return render_template("image.html", errors=e, username=Users.query.filter_by(id=current_user.id).first().username)
+                    return render_template("image.html", errors=e,
+                                           username=Users.query.filter_by(id=current_user.id).first().username)
             return redirect(url_for('index'))
         else:
             return render_template("image.html", username=Users.query.filter_by(id=current_user.id).first().username)

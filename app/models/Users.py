@@ -16,8 +16,7 @@ class Users(db.Model):
         self.email = email
 
     def __repr__(self):
-        return "Username: {} \n" \
-               "Email {}".format(self.username, self.email)
+        return "{}".format(self.username)
 
     def is_authenticated(self):
         return True

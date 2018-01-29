@@ -26,5 +26,6 @@ from app.views import loginView
 from app.views import goodsView
 from app.views import view
 from app.views import imageView
+from app.views import catView
 
 from app.models import Users
