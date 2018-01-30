@@ -6,7 +6,7 @@ from multiprocessing.pool import Pool
 
 import multiprocessing
 from PIL import Image
-from flask import request, redirect, url_for, render_template, flash
+from flask import request, redirect, url_for, render_template, flash, session
 from flask_login import current_user
 from pytesseract import pytesseract
 from werkzeug.utils import secure_filename
@@ -14,6 +14,7 @@ from werkzeug.utils import secure_filename
 from app import app, db
 from app.checkParser import common_parse
 from app.models.Goods import Goods
+from app.models.Item import Item
 from app.models.Purchase import Purchase
 from app.models.PurchaseConsist import PurchaseConsist
 from app.models.Users import Users
@@ -28,7 +29,7 @@ def allowed_file(filename):
            filename.rsplit('.', 1)[1].lower() in ALLOWED_EXTENSIONS
 
 
-def getText(filename):
+def get_text(filename):
     text = pytesseract.image_to_string(Image.open(filename), lang="eng+rus")
     os.remove(filename)
     return text
@@ -47,7 +48,6 @@ def image():
                 if file and allowed_file(file.filename):
                     filename = str(current_user) + secure_filename(file.filename)
                     path = "".join([app.config['UPLOAD_FOLDER'], filename])
-                    print(path)
                     file.save(path)
 
                 image = Image.open(path)
@@ -58,7 +58,7 @@ def image():
 
                 cpuCount = multiprocessing.cpu_count()
                 pool = Pool(cpuCount)
-                result = pool.map(getText, images)
+                result = pool.map(get_text, images)
                 pool.close()
 
                 for res in result:
@@ -74,7 +74,6 @@ def image():
                 result = text.split('\n')
 
                 result, shop, address, buy_date, sum, items, payment_type = common_parse(result)
-                print(shop, address, sum)
 
             except Exception as e:
                 print(e)
@@ -91,7 +90,6 @@ def image():
                     db.session.commit()
                 else:
                     purchase = purchase_new
-                    print(purchase)
                     flag = True
 
             except Exception as e:
@@ -108,7 +106,6 @@ def image():
                     db.session.add(user_purchase)
                     db.session.commit()
                 else:
-                    print(user_purchase)
                     user_purchase = user_purchase_new
                     if flag:
                         return render_template("image.html", errors="Такой чек уже есть",
@@ -123,6 +120,7 @@ def image():
 
             goods = []
             purchases_goods = []
+            item_list = []
 
             for item in items:
                 try:
@@ -134,6 +132,7 @@ def image():
                         goods.append(good)
                     else:
                         good = find_good
+                    item_list.append(Item(good.id, good.name, item.get('number'), item.get('cost'), 'без категории'))
                 except Exception as e:
                     print(e)
                     db.session.rollback()
@@ -164,21 +163,93 @@ def image():
                     db.session.commit()
                     return render_template("image.html", errors=e,
                                            username=Users.query.filter_by(id=current_user.id).first().username)
-            return redirect(url_for('index'))
+            session['u_p_id'] = user_purchase.id
+            return redirect(url_for('image_info'))
         else:
             return render_template("image.html", username=Users.query.filter_by(id=current_user.id).first().username)
     else:
         return redirect(url_for('login'))
 
 
+@app.route('/image_info', methods=['GET', 'POST'])
+def image_info():
+    categories = ['без категории', 'продукты', 'одежда']
+    if current_user.is_authenticated:
+        if request.method == 'POST':
+            items = {}
+            purchase_id = request.form.get("purchase")
+            for key in request.form.keys():
+                value = request.form.get(key)
+                if "name" in key:
+                    key = key.replace("name", "")
+                    previous = items.get(key)
+                    if previous is not None:
+                        previous.update({"name": value})
+                        items[key] = previous
+                    else:
+                        items[key] = {"name": value}
+                if "category" in key:
+                    key = key.replace("category", "")
+                    previous = items.get(key)
+                    if (previous is not None):
+                        previous.update({"category": value})
+                        items[key] = previous
+                    else:
+                        items[key] = {"category": value}
+
+            for key, value in items.items():
+                try:
+                    good = db.session.query(Goods).filter_by(id=key).first()
+                    if len(good.name) > 0:
+                        good.name = value.get('name')
+                    db.session.commit()
+
+                except Exception as e:
+                    print(e)
+                    db.session.rollback()
+
+                try:
+                    user_purchase = db.session.query(UsersPurchase.id).filter_by(purchase_id=purchase_id,
+                                                                                 user_id=current_user.id).first()
+                    purchase_consist = db.session.query(PurchaseConsist).filter_by(purchase_id=user_purchase,
+                                                                                   good_id=good.id).first()
+                    purchase_consist.category = value.get('category')
+                    db.session.commit()
+                    print("commit")
+                except Exception as e:
+                    print(e)
+                    db.session.rollback()
+                    print("rollback")
+                
+            return redirect(url_for('index'))
+        else:
+            user_purchase = session['u_p_id']
+            purchase_id = db.session.query(UsersPurchase.purchase_id).filter_by(id=user_purchase).first()
+            purchase = db.session.query(Purchase).filter_by(id=purchase_id).first()
+            goods = db.session.query(Goods.id, Goods.name, PurchaseConsist.number, Goods.price, PurchaseConsist.sale,
+                                     PurchaseConsist.category).join(PurchaseConsist).filter(
+                PurchaseConsist.purchase_id == user_purchase).all()
+            items = []
+            for good in goods:
+                print("image_info\n" + str(good))
+                items.append(
+                    Item(good.id, good.name, (good.price - good.sale) * good.number, good.number, good.category))
+            session['u_p_id'] = 0
+            return render_template("image_info.html", items=items, categories=categories, purchase=purchase)
+    else:
+        return redirect(url_for('login'))
+
+
 @app.route('/purchase', methods=['GET', 'POST'])
 def purchase():
+    categories = ['без категорий', 'продукты', 'одежда']
     if current_user.is_authenticated:
         if request.method == 'POST':
             purchase_date = request.form.get("purchase_date")
             shop = request.form.get("shop")
             price = request.form.get("price")
             type = request.form.get("payment_type")
+            category = request.form.get("category")
 
             shop_rex = '^[A-ZА-Яa-zа-я 0-9]*'
             price_rex = '[1-9]+[0-9]*(\.?[0-9]+)?'
@@ -202,7 +273,7 @@ def purchase():
 
                 regex = re.compile(price_rex)
                 if not regex.match(price):
-                    raise ValueError("Цена может быть щаписана только в формате ZZZ,ZZ")
+                    raise ValueError("Цена может быть записана только в формате ZZZ,ZZ")
 
                 regex = re.compile(date_rex)
                 if not regex.match(purchase_date):
@@ -213,17 +284,17 @@ def purchase():
                 if datetime.now() < buy_date:
                     raise ValueError("Дата не может превыщать текущую")
             except Exception as e:
-                return render_template("add_purchase.html", errors=e)
+                return render_template("add_purchase.html", categories=categories, errors=e)
 
             try:
 
-                purchase = Purchase(buy_date, shop, float(price), type)
+                purchase = Purchase(buy_date, shop, float(price), type, category)
                 db.session.add(purchase)
                 db.session.commit()
             except Exception as e:
                 print(e)
                 db.session.rollback()
-                return render_template("add_purchase.html", errors=e)
+                return render_template("add_purchase.html", categories=categories, errors=e)
 
             try:
                 print(current_user.get_id())
@@ -235,10 +306,10 @@ def purchase():
                 db.session.rollback()
                 db.session.delete(purchase)
                 db.session.commit()
-                return render_template("add_purchase.html", errors=e)
+                return render_template("add_purchase.html", categories=categories, errors=e)
 
             return redirect(url_for('index'))
         else:
-            return render_template("add_purchase.html")
+            return render_template("add_purchase.html", categories=categories)
     else:
         return redirect(url_for('login'))

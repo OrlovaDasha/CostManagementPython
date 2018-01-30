@@ -53,10 +53,7 @@ def delete_purchase(purchase_id):
         userPurchase = UsersPurchase.query.filter_by(user_id = current_user.id, purchase_id = purchase_id).first()
         consists = PurchaseConsist.query.filter_by(purchase_id = userPurchase.id).all()
         for consist in consists:
-            good = Goods.query.filter_by(id = consist.good_id).first()
             db.session.delete(consist)
-            db.session.commit()
-            db.session.delete(good)
             db.session.commit()
         db.session.delete(userPurchase)
         db.session.commit()

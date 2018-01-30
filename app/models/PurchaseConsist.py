@@ -10,6 +10,7 @@ class PurchaseConsist(db.Model):
     purchase_id = db.Column(db.Integer, db.ForeignKey('users_purchase.id'), nullable=False)
     number = db.Column(db.Integer, nullable=False)
     sale = db.Column(db.DECIMAL, nullable=False, default=0)
+    category = db.Column(db.String, nullable=False, default='без категории')
 
     def __init__(self, good_id, purchase_id, number):
         self.good_id = good_id

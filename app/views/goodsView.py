@@ -30,10 +30,11 @@ def get_goods(purchase_id):
         print(i.name)
 
     table = DataTable(param, Goods,
-                      db.session.query(Goods.name, Goods.price).join(PurchaseConsist).filter(PurchaseConsist.purchase_id == user_purchase.id),
+                      db.session.query(Goods.name, Goods.price, PurchaseConsist.category).join(PurchaseConsist).filter(PurchaseConsist.purchase_id == user_purchase.id),
                       [
                           "name",
-                          "price"
+                          "price",
+                          "category"
                           # ("edit", lambda
                           #     value: '<a class="btn btn-xs btn-block btn-info" href="%s"> <span class="glyphicon glyphicon-edit">'
                           #            '</span> Изменение</a>' % url_for('edit_class', class_id=value.id)),

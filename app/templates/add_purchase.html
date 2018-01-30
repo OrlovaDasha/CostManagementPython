@@ -72,9 +72,30 @@
                        </div>
                 </div>
             </div>
+
+            <div class="row">
+                <div class="form-group">
+                    <label class="control-label col-sm-4" for="payment_type">Категория:</label>
+                       <div class="col-sm-4">
+                            <div class='input-group date'>
+                              <select type="category" placeholder="Category" class="form-control" name="category" id="category">
+                               {% for category in categories %}
+                                <option value="{{category}}">{{category}}</option>
+                                  {% endfor %}
+                              </select>
+                            </div>
+                       </div>
+                </div>
+            </div>
+
+
             <div class="panel-footer clearfix">
                 <div class="col-md-4">
                     <button class="btn btn-success btn-block" role="button">Добавить</button>
+
+                </div>
+                <div class="col-md-4">
+                    <a id="add_category" class="btn btn-default pull-right">Новая категория</a>
                 </div>
             </div>
         </form>

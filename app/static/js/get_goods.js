@@ -8,7 +8,8 @@ $(document).ready(function() {
              ajax: goods_route,
              columns: [
                 {data: "name"},
-                {data: "price"}
+                {data: "price"},
+                 {data:"category"}
                  // {data: "edit"},
                  // {data:"go"}
              ]
