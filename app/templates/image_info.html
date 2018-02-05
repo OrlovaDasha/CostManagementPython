@@ -1,5 +1,14 @@
 {% extends "main.html" %}
 
+ {% block css %}
+			{{super()}}
+            <link href="{{ url_for('static', filename='css/loading.css') }}" rel="stylesheet">
+{% endblock %}
+{% block scripts %}
+			{{super()}}
+            <script type="text/javascript" src="{{ url_for('static', filename='js/get_category.js') }}"></script>
+{% endblock %}
+
 {% block content %}
  <div id="alertDiv">
         {% if errors %}
@@ -12,7 +21,8 @@
 
 <form action="" method="POST">
 <div class="container">
-    <div class="row clearfix">
+	<div class="center-block" id="load"></div>
+    <div id ="main" class="row clearfix">
     	<div class="col-md-12 table-responsive">
 			<h4>Дата покупки:{{purchase.purchase_date}} Магазин:{{purchase.shop}} Итог: {{purchase.price}} </h4>
 			<input id="purchase" name="purchase" value="{{purchase.id}}" type="hidden">
@@ -29,8 +39,6 @@
 						</th>
 						<th class="text-center">
 							Категория
-						</th>
-        				<th class="text-center" style="border-top: 1px solid #ffffff; border-right: 1px solid #ffffff;">
 						</th>
 					</tr>
                 {% for item in items %}
@@ -60,15 +68,15 @@
 		</div>
 	</div>
 
-     <div class="panel-footer clearfix">
-            <div class="col-md-2">
-               <a id="add_category" class="btn btn-info pull-right">Новая категория</a>
+     <div id = "buttons" class="panel-footer clearfix">
+            <div class="col-md-3">
+               <a id="add_category" class="btn btn-info btn-block pull-right">Новая категория</a>
             </div>
-           <div class="col-md-4">
-               <a id="auto_categorization" class="btn btn-info pull-right">Определить категории</a>
+           <div class="col-md-3">
+               <a id="auto_categorization" class="btn btn-info btn-block pull-right">Определить категории</a>
            </div>
           <div class="col-md-6">
-               <button type="submit" id="save" class="btn btn-success pull-right">Сохранить</button>
+               <button type="submit" id="save" class="btn btn-success btn-block pull-right">Сохранить</button>
           </div>
      </div>
 </form>

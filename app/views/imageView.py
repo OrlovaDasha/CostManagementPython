@@ -35,6 +35,29 @@ def get_text(filename):
     return text
 
 
+def get_items(request):
+    items = {}
+    for key in request.form.keys():
+        value = request.form.get(key)
+        if "name" in key:
+            key = key.replace("name", "")
+            previous = items.get(key)
+            if previous is not None:
+                previous.update({"name": value})
+                items[key] = previous
+            else:
+                items[key] = {"name": value}
+        if "category" in key:
+            key = key.replace("category", "")
+            previous = items.get(key)
+            if (previous is not None):
+                previous.update({"category": value})
+                items[key] = previous
+            else:
+                items[key] = {"category": value}
+    return items
+
+
 @app.route('/image', methods=['GET', 'POST'])
 def image():
     if current_user.is_authenticated:
@@ -173,29 +196,11 @@ def image():
 
 @app.route('/image_info', methods=['GET', 'POST'])
 def image_info():
-    categories = ['без категории', 'продукты', 'одежда']
+    categories = ['без категории', 'продукты']
     if current_user.is_authenticated:
         if request.method == 'POST':
-            items = {}
             purchase_id = request.form.get("purchase")
-            for key in request.form.keys():
-                value = request.form.get(key)
-                if "name" in key:
-                    key = key.replace("name", "")
-                    previous = items.get(key)
-                    if previous is not None:
-                        previous.update({"name": value})
-                        items[key] = previous
-                    else:
-                        items[key] = {"name": value}
-                if "category" in key:
-                    key = key.replace("category", "")
-                    previous = items.get(key)
-                    if (previous is not None):
-                        previous.update({"category": value})
-                        items[key] = previous
-                    else:
-                        items[key] = {"category": value}
+            items = get_items(request)
 
             for key, value in items.items():
                 try:
@@ -220,7 +225,7 @@ def image_info():
                     print(e)
                     db.session.rollback()
                     print("rollback")
-                
+
             return redirect(url_for('index'))
         else:
             user_purchase = session['u_p_id']
@@ -231,9 +236,8 @@ def image_info():
                 PurchaseConsist.purchase_id == user_purchase).all()
             items = []
             for good in goods:
-                print("image_info\n" + str(good))
                 items.append(
-                    Item(good.id, good.name, (good.price - good.sale) * good.number, good.number, good.category))
+                    Item(good.id, good.name, good.price, good.number, good.category))
             session['u_p_id'] = 0
             return render_template("image_info.html", items=items, categories=categories, purchase=purchase)
     else:

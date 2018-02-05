@@ -48,22 +48,34 @@ def index():
 @app.route('/delete_purchase/<purchase_id>')
 def delete_purchase(purchase_id):
     print('delete')
+    purchase = Purchase.query.filter_by(id=purchase_id).first()
+    userPurchase = UsersPurchase.query.filter_by(user_id=current_user.id, purchase_id=purchase_id).first()
+    consists = PurchaseConsist.query.filter_by(purchase_id=userPurchase.id).all()
+
     try:
-        purchase = Purchase.query.filter_by(id = purchase_id).first()
-        userPurchase = UsersPurchase.query.filter_by(user_id = current_user.id, purchase_id = purchase_id).first()
-        consists = PurchaseConsist.query.filter_by(purchase_id = userPurchase.id).all()
         for consist in consists:
             db.session.delete(consist)
             db.session.commit()
-        db.session.delete(userPurchase)
-        db.session.commit()
-        db.session.delete(purchase)
-        db.session.commit()
-        return redirect(url_for("index"))
     except Exception as e:
         db.session.rollback()
         print(e)
-        return redirect(url_for("index"))
+
+
+    try:
+        db.session.delete(userPurchase)
+        db.session.commit()
+    except Exception as e:
+        db.session.rollback()
+        print(e)
+
+    try:
+        db.session.delete(purchase)
+        db.session.commit()
+    except Exception as e:
+        db.session.rollback()
+        print(e)
+
+    return redirect(url_for("index"))
 
 
 @app.route('/transactions')
