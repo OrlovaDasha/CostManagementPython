@@ -2,6 +2,7 @@ import os
 import re
 import time
 from datetime import datetime
+from itertools import chain
 from multiprocessing.pool import Pool
 
 import multiprocessing
@@ -9,10 +10,12 @@ from PIL import Image
 from flask import request, redirect, url_for, render_template, flash, session
 from flask_login import current_user
 from pytesseract import pytesseract
+from sqlalchemy import or_
 from werkzeug.utils import secure_filename
 
 from app import app, db
 from app.checkParser import common_parse
+from app.models.Category import Category
 from app.models.Goods import Goods
 from app.models.Item import Item
 from app.models.Purchase import Purchase
@@ -55,6 +58,14 @@ def get_items(request):
                 items[key] = previous
             else:
                 items[key] = {"category": value}
+        if "word" in key:
+            key = key.replace("word", "")
+            previous = items.get(key)
+            if (previous is not None):
+                previous.update({"word": value})
+                items[key] = previous
+            else:
+                items[key] = {"word": value}
     return items
 
 
@@ -196,8 +207,11 @@ def image():
 
 @app.route('/image_info', methods=['GET', 'POST'])
 def image_info():
-    categories = ['без категории', 'продукты']
     if current_user.is_authenticated:
+        categories = db.session.query(Category.name).filter_by(user_id=current_user.id).all()
+        categories += db.session.query(Category.name).filter_by(user_id=None).all()
+        categories = list(chain.from_iterable(categories))
+        print(categories)
         if request.method == 'POST':
             purchase_id = request.form.get("purchase")
             items = get_items(request)
@@ -246,8 +260,10 @@ def image_info():
 
 @app.route('/purchase', methods=['GET', 'POST'])
 def purchase():
-    categories = ['без категорий', 'продукты', 'одежда']
     if current_user.is_authenticated:
+        categories = db.session.query(Category.name).filter_by(user_id=current_user.id).all()
+        categories += db.session.query(Category.name).filter_by(user_id=None).all()
+        print(categories)
         if request.method == 'POST':
             purchase_date = request.form.get("purchase_date")
             shop = request.form.get("shop")

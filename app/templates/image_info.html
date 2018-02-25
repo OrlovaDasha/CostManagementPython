@@ -19,10 +19,29 @@
         {% endif %}
  </div>
 
-<form action="" method="POST">
+<div id="myModal" class="modal fade" role="dialog">
+	<form action="" method="POST">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <button type="button" class="close" data-dismiss="modal">&times;</button>
+        <h4 class="modal-title">Введите название категории</h4>
+      </div>
+      <div class="modal-body">
+        <input id="new_category" name="new_category"/>
+      </div>
+      <div class="modal-footer">
+        <a id="add_category" type="button" class="btn btn-default" data-dismiss="modal">Сохранить</a>
+      </div>
+    </div>
+  </div>
+		</form>
+</div>
+
+<form action="" id="main" method="POST">
 <div class="container">
 	<div class="center-block" id="load"></div>
-    <div id ="main" class="row clearfix">
+    <div id ="mainDiv" class="row clearfix">
     	<div class="col-md-12 table-responsive">
 			<h4>Дата покупки:{{purchase.purchase_date}} Магазин:{{purchase.shop}} Итог: {{purchase.price}} </h4>
 			<input id="purchase" name="purchase" value="{{purchase.id}}" type="hidden">
@@ -43,8 +62,10 @@
 					</tr>
                 {% for item in items %}
     				<tr>
+
 						<td>
 						    <input type="text" name="{{'name' ~ item.id}}"   class="form-control" value="{{item.name}}"/>
+							<input type="text" name="{{'word' ~ item.id}}"  value=""/>
 						</td>
 						<td>
 							{{item.number}}
@@ -70,7 +91,7 @@
 
      <div id = "buttons" class="panel-footer clearfix">
             <div class="col-md-3">
-               <a id="add_category" class="btn btn-info btn-block pull-right">Новая категория</a>
+               <button type="button" class="btn btn-info btn-lg" data-toggle="modal" data-target="#myModal">Добавить категорию</button>
             </div>
            <div class="col-md-3">
                <a id="auto_categorization" class="btn btn-info btn-block pull-right">Определить категории</a>
@@ -78,8 +99,8 @@
           <div class="col-md-6">
                <button type="submit" id="save" class="btn btn-success btn-block pull-right">Сохранить</button>
           </div>
-     </div>
-</form>
+	 </div>
 </div>
+</form>
 
 {%endblock%}

@@ -5,9 +5,30 @@ from flask import request, jsonify
 from flask_login import current_user
 
 from app import app, db
+from app.models.Category import Category
 from app.models.Goods import Goods
 from app.models.Products import Products
 from app.views.imageView import get_items
+
+
+@app.route('/add_category', methods=['POST'])
+def add_category():
+    if current_user.is_authenticated:
+        if request.method == 'POST':
+            category_name = request.form.get("new_category")
+            category = db.session.query(Category).filter_by(name=category_name, user_id=current_user.id).first()
+            if category is None:
+                category = db.session.query(Category).filter_by(name=category_name, user_id=None).first()
+                if category is None:
+                    try:
+                        db.session.add(Category(category_name, current_user.id))
+                        db.session.commit()
+                    except Exception as e:
+                        print(e)
+                        db.session.rollback()
+                        return jsonify({"Error": e})
+                    return jsonify({"Name": category_name})
+            return jsonify({"Error": "Category is already in use"})
 
 
 @app.route('/auto_categorization', methods=['POST'])
@@ -17,24 +38,25 @@ def auto_categorization():
         if request.method == 'POST':
             purchase_id = request.form.get("purchase")
             items = get_items(request)
+            print(items)
             categories = db.session.query(Products).all()
             for category in categories:
                 for key, value in items.items():
-                    if items[key]["category"] == "без категории":
-                        text = regex.sub('', items[key].get("name").replace(" ", ""))
-                        word = category.name.replace(" ", "")
-
-                        if len(text) > len(word):
-                            for i in range(0, len(text) - len(word)):
-                                lev = levenstein(text[i:i+len(word)].lower(), word, 1)
-                                if lev <= 1:
-                                    if "word" not in items[key]:
+                    print(key + " " + items[key]["name"])
+                    text = regex.sub('', items[key]["name"].replace(" ", ""))
+                    word = category.name.replace(" ", "")
+                    if len(text) > len(word):
+                        for i in range(0, len(text) - len(word)):
+                            lev = levenstein(text[i:i + len(word)].lower(), word, 1)
+                            if lev <= 1:
+                                print(text[i:i + len(word)].lower() + " " + word)
+                                if "word" not in items[key]:
+                                    items[key]["word"] = word
+                                    items[key]["category"] = category.category
+                                else:
+                                    if len(items[key]["word"]) < len(word) or lev == 0:
                                         items[key]["word"] = word
                                         items[key]["category"] = category.category
-                                    else:
-                                        if len(items[key]["word"]) < len(word) or lev == 0:
-                                            items[key]["word"] = word
-                                            items[key]["category"] = category.category
             print(items)
             return jsonify(items)
 
@@ -80,6 +102,6 @@ def categorise():
     word = "апельсин"
 
     for i in range(0, len(text) - len(word)):
-        if levenstein(text[i:i+len(word)].lower(), word, 3) <= 3:
+        if levenstein(text[i:i + len(word)].lower(), word, 3) <= 3:
             print(text[i:i + len(word)])
     return None
