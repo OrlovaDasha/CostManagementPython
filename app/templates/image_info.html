@@ -65,7 +65,7 @@
 
 						<td>
 						    <input type="text" name="{{'name' ~ item.id}}"   class="form-control" value="{{item.name}}"/>
-							<input type="text" name="{{'word' ~ item.id}}"  value=""/>
+							<input type="text" name="{{'word' ~ item.id}}"  type="hidden" value=""/>
 						</td>
 						<td>
 							{{item.number}}
@@ -93,9 +93,6 @@
             <div class="col-md-3">
                <button type="button" class="btn btn-info btn-lg" data-toggle="modal" data-target="#myModal">Добавить категорию</button>
             </div>
-           <div class="col-md-3">
-               <a id="auto_categorization" class="btn btn-info btn-block pull-right">Определить категории</a>
-           </div>
           <div class="col-md-6">
                <button type="submit" id="save" class="btn btn-success btn-block pull-right">Сохранить</button>
           </div>

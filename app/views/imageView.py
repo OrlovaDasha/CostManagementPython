@@ -18,6 +18,7 @@ from app.checkParser import common_parse
 from app.models.Category import Category
 from app.models.Goods import Goods
 from app.models.Item import Item
+from app.models.Products import Products
 from app.models.Purchase import Purchase
 from app.models.PurchaseConsist import PurchaseConsist
 from app.models.Users import Users
@@ -226,6 +227,19 @@ def image_info():
                 except Exception as e:
                     print(e)
                     db.session.rollback()
+
+                try:
+                    product = db.session.query(Products).filter_by(name=value.get('word'), owner=current_user.id).first()
+                    if product is not None:
+                        product.category = value.get('category')
+                    else:
+                        product = Products(value.get('word'), value.get('category'),  current_user.id)
+                        db.session.add(product)
+                    db.session.commit()
+                except Exception as e:
+                    print(e)
+                    db.session.rollback()
+
 
                 try:
                     user_purchase = db.session.query(UsersPurchase.id).filter_by(purchase_id=purchase_id,

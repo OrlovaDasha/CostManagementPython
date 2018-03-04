@@ -8,6 +8,9 @@ from app import app, db
 from app.models.Category import Category
 from app.models.Goods import Goods
 from app.models.Products import Products
+from app.models.Purchase import Purchase
+from app.models.PurchaseConsist import PurchaseConsist
+from app.models.UsersPurchase import UsersPurchase
 from app.views.imageView import get_items
 
 
@@ -39,10 +42,10 @@ def auto_categorization():
             purchase_id = request.form.get("purchase")
             items = get_items(request)
             print(items)
-            categories = db.session.query(Products).all()
+            categories = db.session.query(Products).filter_by(owner=None).all()
+
             for category in categories:
                 for key, value in items.items():
-                    print(key + " " + items[key]["name"])
                     text = regex.sub('', items[key]["name"].replace(" ", ""))
                     word = category.name.replace(" ", "")
                     if len(text) > len(word):
@@ -56,7 +59,11 @@ def auto_categorization():
                                 else:
                                     if len(items[key]["word"]) < len(word) or lev == 0:
                                         items[key]["word"] = word
-                                        items[key]["category"] = category.category
+                                        user_category = db.session.query(Products).filter_by(owner=current_user.id, name = category.name).first()
+                                        if user_category is not None:
+                                            items[key]["category"] = user_category.category
+                                        else:
+                                            items[key]["category"] = category.category
             print(items)
             return jsonify(items)
 

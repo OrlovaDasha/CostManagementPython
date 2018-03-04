@@ -60,7 +60,6 @@ def delete_purchase(purchase_id):
         db.session.rollback()
         print(e)
 
-
     try:
         db.session.delete(userPurchase)
         db.session.commit()
@@ -74,6 +73,7 @@ def delete_purchase(purchase_id):
     except Exception as e:
         db.session.rollback()
         print(e)
+
 
     return redirect(url_for("index"))
 
