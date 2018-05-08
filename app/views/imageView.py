@@ -1,6 +1,6 @@
 import os
 import re
-import time
+import time as time_module
 from datetime import datetime
 from itertools import chain
 from multiprocessing.pool import Pool
@@ -229,17 +229,17 @@ def image_info():
                     db.session.rollback()
 
                 try:
-                    product = db.session.query(Products).filter_by(name=value.get('word'), owner=current_user.id).first()
+                    product = db.session.query(Products).filter_by(name=value.get('word'),
+                                                                   owner=current_user.id).first()
                     if product is not None:
                         product.category = value.get('category')
                     else:
-                        product = Products(value.get('word'), value.get('category'),  current_user.id)
+                        product = Products(value.get('word'), value.get('category'), current_user.id)
                         db.session.add(product)
                     db.session.commit()
                 except Exception as e:
                     print(e)
                     db.session.rollback()
-
 
                 try:
                     user_purchase = db.session.query(UsersPurchase.id).filter_by(purchase_id=purchase_id,

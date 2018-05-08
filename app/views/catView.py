@@ -1,6 +1,6 @@
 import operator
 import re
-
+import time as time_module
 from flask import request, jsonify
 from flask_login import current_user
 
@@ -36,6 +36,7 @@ def add_category():
 
 @app.route('/auto_categorization', methods=['POST'])
 def auto_categorization():
+    time = time_module.clock()
     regex = re.compile('[^a-zA-Zа-яА-Я]')
     if current_user.is_authenticated:
         if request.method == 'POST':
@@ -64,7 +65,9 @@ def auto_categorization():
                                             items[key]["category"] = user_category.category
                                         else:
                                             items[key]["category"] = category.category
-            print(items)
+
+            print("Time" + time.__str__())
+
             return jsonify(items)
 
 
