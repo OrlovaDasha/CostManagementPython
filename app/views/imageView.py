@@ -51,6 +51,7 @@ def get_items(request):
                 items[key] = previous
             else:
                 items[key] = {"name": value}
+            items[key].update({'lev': 2})
         if "category" in key:
             key = key.replace("category", "")
             previous = items.get(key)
@@ -67,14 +68,17 @@ def get_items(request):
                 items[key] = previous
             else:
                 items[key] = {"word": value}
+
     return items
 
 
 @app.route('/image', methods=['GET', 'POST'])
 def image():
+    session["time"] = time_module.clock()
     if current_user.is_authenticated:
         if request.method == 'POST':
             try:
+                time = time_module.clock()
                 file = request.files['image']
 
                 if file.filename == '':
@@ -84,7 +88,9 @@ def image():
                     filename = str(current_user) + secure_filename(file.filename)
                     path = "".join([app.config['UPLOAD_FOLDER'], filename])
                     file.save(path)
+                print("Download time" + (time_module.clock() - time).__str__())
 
+                time = time_module.clock()
                 image = Image.open(path)
                 images = slice_image(image, os.path.splitext(filename)[0] + '_slice')
                 os.remove(path)
@@ -95,6 +101,7 @@ def image():
                 pool = Pool(cpuCount)
                 result = pool.map(get_text, images)
                 pool.close()
+                print("Tesseract time" + (time_module.clock() - time).__str__())
 
                 for res in result:
                     text += '\n'
@@ -108,7 +115,9 @@ def image():
 
                 result = text.split('\n')
 
+                time = time_module.clock()
                 result, shop, address, buy_date, sum, items, payment_type = common_parse(result)
+                print("Parser time" + (time_module.clock() - time).__str__())
 
             except Exception as e:
                 print(e)
@@ -212,7 +221,7 @@ def image_info():
         categories = db.session.query(Category.name).filter_by(user_id=current_user.id).all()
         categories += db.session.query(Category.name).filter_by(user_id=None).all()
         categories = list(chain.from_iterable(categories))
-        print(categories)
+        # print(categories)
         if request.method == 'POST':
             purchase_id = request.form.get("purchase")
             items = get_items(request)
@@ -267,6 +276,7 @@ def image_info():
                 items.append(
                     Item(good.id, good.name, good.price, good.number, good.category))
             session['u_p_id'] = 0
+            print("End time: " + (time_module.clock() - session["time"]).__str__())
             return render_template("image_info.html", items=items, categories=categories, purchase=purchase)
     else:
         return redirect(url_for('login'))
@@ -277,7 +287,7 @@ def purchase():
     if current_user.is_authenticated:
         categories = db.session.query(Category.name).filter_by(user_id=current_user.id).all()
         categories += db.session.query(Category.name).filter_by(user_id=None).all()
-        print(categories)
+        # print(categories)
         if request.method == 'POST':
             purchase_date = request.form.get("purchase_date")
             shop = request.form.get("shop")
@@ -289,7 +299,7 @@ def purchase():
             price_rex = '[1-9]+[0-9]*(\.?[0-9]+)?'
             date_rex = '^(0[1-9]|1[0-2])/(0[1-9]|[1-2][0-9]|3[0-1])/[1-2][0-9]{3}'
 
-            print("{} {} {} {}".format(purchase_date, shop, price, type))
+            # print("{} {} {} {}".format(purchase_date, shop, price, type))
 
             try:
                 if not purchase_date:

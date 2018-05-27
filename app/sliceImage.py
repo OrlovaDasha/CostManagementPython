@@ -25,15 +25,14 @@ def find_lines(image):
     blank_lines = []
     prev = 0
     for y in range(height):
-        cur_row_is_blank = False
+        cur_row = 0
         for x in range(width):
             cur_pixel = pixels[x, y]
             cur_pixel_mono = sum(cur_pixel) / len(cur_pixel)
-            if cur_pixel_mono < 255:
-                break
-                cur_row_is_blank = True
+            cur_row += cur_pixel_mono
 
-        if cur_row_is_blank:
+        cur_row_avg = cur_row / width
+        if cur_row_avg == 255:
             if y - prev > 1:
                 blank_lines.append(y)
             prev = y
@@ -43,7 +42,6 @@ def find_lines(image):
 
 def slice_image(image, out_name):
     slice_coordinates = find_lines(image)
-    del slice_coordinates[::2]
     del slice_coordinates[::2]
     width, height = image.size
     upper = 0

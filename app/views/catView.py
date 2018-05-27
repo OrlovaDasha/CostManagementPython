@@ -42,7 +42,7 @@ def auto_categorization():
         if request.method == 'POST':
             purchase_id = request.form.get("purchase")
             items = get_items(request)
-            print(items)
+            # print(items)
             categories = db.session.query(Products).filter_by(owner=None).all()
 
             for category in categories:
@@ -53,21 +53,24 @@ def auto_categorization():
                         for i in range(0, len(text) - len(word)):
                             lev = levenstein(text[i:i + len(word)].lower(), word, 1)
                             if lev <= 1:
-                                print(text[i:i + len(word)].lower() + " " + word)
+                                # print(text[i:i + len(word)].lower() + " " + word)
                                 if "word" not in items[key]:
                                     items[key]["word"] = word
                                     items[key]["category"] = category.category
+                                    items[key].update({"lev": lev})
                                 else:
-                                    if len(items[key]["word"]) < len(word) or lev == 0:
+                                    if len(items[key]["word"]) < len(word) or lev < items[key]["lev"]:
+                                            # (len(items[key]["word"]) >= len(word) and lev < items[key]["lev"]):
                                         items[key]["word"] = word
+                                        items[key]["lev"] =  lev
+                                        # print(items[key])
                                         user_category = db.session.query(Products).filter_by(owner=current_user.id, name = category.name).first()
                                         if user_category is not None:
                                             items[key]["category"] = user_category.category
                                         else:
                                             items[key]["category"] = category.category
 
-            print("Time" + time.__str__())
-
+            print("Category time" + (time_module.clock() - time).__str__())
             return jsonify(items)
 
 

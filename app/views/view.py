@@ -1,7 +1,9 @@
 import locale
+from collections import OrderedDict
 
 from flask import request, render_template, redirect, url_for, session
 from flask_login import current_user, login_required
+from sqlalchemy import desc
 
 from app import app, db, nav
 from app.models.Goods import Goods
@@ -29,9 +31,10 @@ def index():
     if current_user.is_authenticated:
         user = Users.query.filter_by(id=current_user.id).first()
         purchases = []
-        purchases = db.session.query(Purchase).join(UsersPurchase).filter(UsersPurchase.user_id == user.id).order_by(Purchase.purchase_date).all()
+        purchases = db.session.query(Purchase).join(UsersPurchase).filter(UsersPurchase.user_id == user.id).order_by(desc(Purchase.purchase_date)).all()
 
-        transactions = {}
+        transactions = OrderedDict()
+        # transactions = {}
         for purchase in purchases:
             key = purchase.purchase_date
             if key not in transactions.keys():

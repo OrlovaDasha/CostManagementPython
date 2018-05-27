@@ -35,7 +35,7 @@ def common_parse(text):
                             '((?:[0-9]{0,3},)?[0-9]{0,3}\.[0-9]{2})$')
     regexp = {1: 'и[тt][оo]г[оo]', 2: '[kк][аa][рp][тt][аa]', 3: '[нh][aа][лп]ич[hн]ы[eе]'}
 
-    print(text[0:1])
+    # print(text[0:1])
 
     address = None
     data = None
